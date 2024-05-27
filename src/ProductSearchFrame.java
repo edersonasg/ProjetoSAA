@@ -140,9 +140,9 @@ public class ProductSearchFrame extends JFrame {
         String searchTerm = searchField.getText().trim();
         if (!searchTerm.isEmpty()) {
             try (PreparedStatement stmt = connection.prepareStatement(
-                    "SELECT c.cassete, c.nivel, c.estado, p.codigo, p.bitola, p.comprimento, p.cor " +
-                            "FROM cassetes c LEFT JOIN produtos p ON c.cassete = p.alocacao " +
-                            "WHERE c.cassete LIKE ? OR p.codigo LIKE ? OR p.bitola LIKE ? OR p.comprimento LIKE ? OR p.cor LIKE ?")) {
+                    "SELECT l.ID, l.nivel, l.pn, p.codigo, p.bitola, p.comprimento, p.cor " +
+                            "FROM locacoes l LEFT JOIN produtos p ON l.ID = p.alocacao " +
+                            "WHERE l.ID LIKE ? OR p.codigo LIKE ? OR p.bitola LIKE ? OR p.comprimento LIKE ? OR p.cor LIKE ?")) {
                 String wildcardTerm = "%" + searchTerm + "%";
                 stmt.setString(1, wildcardTerm);
                 stmt.setString(2, wildcardTerm);
@@ -157,9 +157,9 @@ public class ProductSearchFrame extends JFrame {
                 } else {
                     tableModel.setRowCount(0); // Limpa a tabela antes de adicionar os novos dados
                     while (rs.next()) {
-                        String cassete = rs.getString("cassete");
+                        String cassete = rs.getString("ID");
                         String nivel = rs.getString("nivel");
-                        String estado = rs.getString("estado");
+                        String estado = rs.getString("pn");
                         tableModel.addRow(new Object[] { cassete, nivel, estado });
                     }
                 }
