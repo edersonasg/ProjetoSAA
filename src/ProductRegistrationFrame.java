@@ -1,23 +1,12 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import javax.swing.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-public class ProductRegistrationFrame {
+public class ProductRegistrationFrame extends JFrame {
 
     private final Connection connection;
     private JTextField codigoField;
@@ -25,68 +14,111 @@ public class ProductRegistrationFrame {
     private JTextField comprimentoField;
     private JComboBox<String> corComboBox;
     private JComboBox<String> alocacaoComboBox;
+    private JLabel loadingLabel;
+
+    private void habilitarAlocacaoComboBox(boolean habilitar) {
+        alocacaoComboBox.setEnabled(habilitar);
+    }
 
     public ProductRegistrationFrame(Connection connection) {
         this.connection = connection;
-    }
+        setTitle("Cadastro de Produto");
+        setSize(500, 300);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-    public void show() {
-        JFrame frame = new JFrame("Cadastro de Produto");
-        frame.setSize(400, 300);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        JPanel contentPane = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.CENTER;
 
-        // Centralizando o JFrame e deslocando um pouco para a esquerda
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (screenSize.width - frame.getWidth()) / 2 - 400; // Deslocamento de 100 pixels para a esquerda
-        int y = (screenSize.height - frame.getHeight()) / 2;
-        frame.setLocation(x, y);
+        JLabel codigoLabel = new JLabel(" Código do Produto:");
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        contentPane.add(codigoLabel, gbc);
+        codigoField = new JTextField(11);
+        codigoField.setText("Exemplo: L1234567");
+        codigoField.setForeground(Color.GRAY);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        contentPane.add(codigoField, gbc);
 
-        JPanel contentPane = new JPanel();
-        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        contentPane.setLayout(new GridLayout(7, 2));
-        frame.setContentPane(contentPane);
+        JLabel corLabel = new JLabel("   Cor:");
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        contentPane.add(corLabel, gbc);
 
-        JLabel codigoLabel = new JLabel("Código do Produto:");
-        codigoField = new JTextField();
-        codigoField.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(codigoLabel);
-        contentPane.add(codigoField);
-
-        JLabel bitolaLabel = new JLabel("Bitola:");
-        bitolaComboBox = new JComboBox<>(new Double[] { 0.35, 0.50, 1.00, 1.50 });
-        bitolaComboBox.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(bitolaLabel);
-        contentPane.add(bitolaComboBox);
+        corComboBox = new JComboBox<>(new String[] { "Vermelho", "Verde", "Azul", "Amarelo", "Branco", "Preto" });
+        corComboBox.setPreferredSize(new Dimension(100, 25));
+        gbc.gridx = 3;
+        gbc.gridy = 0;
+        contentPane.add(corComboBox, gbc);
 
         JLabel comprimentoLabel = new JLabel("Comprimento (mm):");
-        comprimentoField = new JTextField();
-        comprimentoField.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(comprimentoLabel);
-        contentPane.add(comprimentoField);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        contentPane.add(comprimentoLabel, gbc);
+        comprimentoField = new JTextField(11);
+        comprimentoField.setText("Exemplo: 80.50 - 1000");
+        comprimentoField.setForeground(Color.GRAY);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        contentPane.add(comprimentoField, gbc);
 
-        JLabel corLabel = new JLabel("Cor:");
-        corComboBox = new JComboBox<>(new String[] { "Vermelho", "Verde", "Azul", "Amarelo", "Branco", "Preto" });
-        corComboBox.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(corLabel);
-        contentPane.add(corComboBox);
+        JLabel bitolaLabel = new JLabel("Bitola:");
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        contentPane.add(bitolaLabel, gbc);
+
+        bitolaComboBox = new JComboBox<>(new Double[] { 0.35, 0.50, 1.00, 1.50 });
+        bitolaComboBox.setPreferredSize(new Dimension(100, 25));
+        gbc.gridx = 3;
+        gbc.gridy = 1;
+        contentPane.add(bitolaComboBox, gbc);
+
+        JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+        separator.setPreferredSize(new Dimension(300, 5));
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 4;
+        contentPane.add(separator, gbc);
+
+        JLabel alocacaoLabel = new JLabel("     Alocação");
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 4;
+        gbc.anchor = GridBagConstraints.CENTER;
+        contentPane.add(alocacaoLabel, gbc);
 
         JButton buscarButton = new JButton("Buscar");
-        buscarButton.setBackground(new Color(0, 102, 204)); // Azul Claro
+        buscarButton.setBackground(new Color(0, 102, 204));
         buscarButton.setForeground(Color.WHITE);
-        contentPane.add(new JLabel()); // Placeholder
-        contentPane.add(buscarButton);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        contentPane.add(buscarButton, gbc);
 
-        JLabel alocacaoLabel = new JLabel("Alocação:");
         alocacaoComboBox = new JComboBox<>();
-        alocacaoComboBox.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-        contentPane.add(alocacaoLabel);
-        contentPane.add(alocacaoComboBox);
+        alocacaoComboBox.setEnabled(false);
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        contentPane.add(alocacaoComboBox, gbc);
 
         JButton cadastrarButton = new JButton("Cadastrar");
-        cadastrarButton.setBackground(new Color(51, 153, 102)); // Verde
+        cadastrarButton.setBackground(new Color(51, 153, 102));
         cadastrarButton.setForeground(Color.WHITE);
-        contentPane.add(new JLabel()); // Placeholder
-        contentPane.add(cadastrarButton);
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.gridwidth = 2;
+        contentPane.add(cadastrarButton, gbc);
+
+        loadingLabel = new JLabel(new ImageIcon("src/resources/loading.gif"));
+        loadingLabel.setVisible(false);
+        gbc.gridx = 2;
+        gbc.gridy = 5;
+        contentPane.add(loadingLabel, gbc);
 
         buscarButton.addActionListener((ActionEvent e) -> {
             buscarAlocacao();
@@ -96,7 +128,48 @@ public class ProductRegistrationFrame {
             cadastrarProduto();
         });
 
-        frame.setVisible(true);
+        codigoField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (codigoField.getText().equals("Exemplo: L1234567")) {
+                    codigoField.setText("");
+                    codigoField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (codigoField.getText().isEmpty()) {
+                    codigoField.setText("Exemplo: L1234567");
+                    codigoField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        comprimentoField.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (comprimentoField.getText().equals("Exemplo: 80.50 - 1000")) {
+                    comprimentoField.setText("");
+                    comprimentoField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (comprimentoField.getText().isEmpty()) {
+                    comprimentoField.setText("Exemplo: 80.50 - 1000");
+                    comprimentoField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        setContentPane(contentPane);
+        setVisible(true);
+    }
+
+    public void addRegistrationFrameListener(WindowListener listener) {
+        addWindowListener(listener);
     }
 
     private void buscarAlocacao() {
@@ -112,10 +185,26 @@ public class ProductRegistrationFrame {
             Double comprimento = Double.valueOf(comprimentoText);
 
             if (bitola != null) {
+                loadingLabel.setVisible(true);
+                habilitarAlocacaoComboBox(false);
+                alocacaoComboBox.removeAllItems();
+                alocacaoComboBox.addItem("Buscando Alocação...");
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(3000); // 10 segundos
+                        SwingUtilities.invokeLater(() -> {
+                            loadingLabel.setVisible(false);
+                            alocacaoComboBox.removeItem("Buscando Alocação...");
+                            habilitarAlocacaoComboBox(true);
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
                 String nivel = calcularNivel(bitola, comprimento);
 
                 if (nivel != null) {
-                    alocacaoComboBox.removeAllItems();
                     PreparedStatement stmt = connection.prepareStatement(
                             "SELECT ID FROM locacoes WHERE nivel = ? AND pn = 'Vazio'");
                     stmt.setString(1, nivel);
@@ -123,12 +212,16 @@ public class ProductRegistrationFrame {
                     while (rs.next()) {
                         alocacaoComboBox.addItem(rs.getString("ID"));
                     }
-                    if (alocacaoComboBox.getItemCount() == 0) {
+                    if (alocacaoComboBox.getItemCount() == 1) {
                         exibirAlerta("Nenhum Cassete Disponível",
                                 "Não há cassetes disponíveis para o nível calculado.");
+                        alocacaoComboBox.removeItem("Buscando Alocação...");
+                        habilitarAlocacaoComboBox(true);
                     }
                 } else {
                     exibirAlerta("Nível não encontrado", "Não foi possível encontrar o nível de alocação.");
+                    alocacaoComboBox.removeItem("Buscando Alocação...");
+                    habilitarAlocacaoComboBox(true);
                 }
             } else {
                 exibirAlerta("Bitola não selecionada", "Por favor, selecione uma bitola antes de buscar a alocação.");
@@ -147,7 +240,6 @@ public class ProductRegistrationFrame {
             System.out.println("Bitola: " + bitola);
             System.out.println("Comprimento: " + comprimento);
 
-            // Comparação das bitolas utilizando um pequeno intervalo de tolerância
             if (Math.abs(bitola - 0.35) < 0.0001) {
                 if (comprimento <= 800) {
                     nivel = "D";
@@ -221,7 +313,6 @@ public class ProductRegistrationFrame {
         }
 
         try {
-            // Verificar se o código já existe
             PreparedStatement checkStmt = connection.prepareStatement("SELECT COUNT(*) FROM produtos WHERE codigo = ?");
             checkStmt.setString(1, codigo);
             ResultSet rs = checkStmt.executeQuery();
@@ -231,7 +322,6 @@ public class ProductRegistrationFrame {
                 return;
             }
 
-            // Cadastrar o produto
             PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO produtos (codigo, bitola, comprimento, cor, alocacao) VALUES (?, ?, ?, ?, ?)");
             statement.setString(1, codigo);
@@ -241,7 +331,6 @@ public class ProductRegistrationFrame {
             statement.setString(5, alocacao);
             statement.executeUpdate();
 
-            // Atualizar o estado do cassete para ocupado
             PreparedStatement updateCasseteStmt = connection.prepareStatement(
                     "UPDATE locacoes SET pn = 'Ocupado' WHERE ID = ?");
             updateCasseteStmt.setString(1, alocacao);
